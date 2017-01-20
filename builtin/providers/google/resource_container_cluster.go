@@ -92,6 +92,13 @@ func resourceContainerCluster() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"additional_zones": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"cluster_ipv4_cidr": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -223,10 +230,15 @@ func resourceContainerCluster() *schema.Resource {
 
 						"oauth_scopes": &schema.Schema{
 							Type:     schema.TypeList,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 							Optional: true,
 							Computed: true,
 							ForceNew: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+								StateFunc: func(v interface{}) string {
+									return canonicalizeServiceScope(v.(string))
+								},
+							},
 						},
 					},
 				},
@@ -271,6 +283,28 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		},
 		Name:             clusterName,
 		InitialNodeCount: int64(d.Get("initial_node_count").(int)),
+	}
+
+	if v, ok := d.GetOk("node_version"); ok {
+		cluster.InitialClusterVersion = v.(string)
+	}
+
+	if v, ok := d.GetOk("additional_zones"); ok {
+		locationsList := v.([]interface{})
+		locations := []string{}
+		zoneInLocations := false
+		for _, v := range locationsList {
+			location := v.(string)
+			locations = append(locations, location)
+			if location == zoneName {
+				zoneInLocations = true
+			}
+		}
+		if !zoneInLocations {
+			// zone must be in locations if specified separately
+			locations = append(locations, zoneName)
+		}
+		cluster.Locations = locations
 	}
 
 	if v, ok := d.GetOk("cluster_ipv4_cidr"); ok {
@@ -340,7 +374,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			scopesList := v.([]interface{})
 			scopes := []string{}
 			for _, v := range scopesList {
-				scopes = append(scopes, v.(string))
+				scopes = append(scopes, canonicalizeServiceScope(v.(string)))
 			}
 
 			cluster.NodeConfig.OauthScopes = scopes
@@ -410,6 +444,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 
 	d.Set("name", cluster.Name)
 	d.Set("zone", cluster.Zone)
+	d.Set("additional_zones", cluster.Locations)
 	d.Set("endpoint", cluster.Endpoint)
 
 	masterAuth := []map[string]interface{}{

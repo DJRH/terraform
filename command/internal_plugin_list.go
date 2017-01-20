@@ -6,6 +6,7 @@
 package command
 
 import (
+	alicloudprovider "github.com/hashicorp/terraform/builtin/providers/alicloud"
 	archiveprovider "github.com/hashicorp/terraform/builtin/providers/archive"
 	atlasprovider "github.com/hashicorp/terraform/builtin/providers/atlas"
 	awsprovider "github.com/hashicorp/terraform/builtin/providers/aws"
@@ -24,22 +25,31 @@ import (
 	dnsimpleprovider "github.com/hashicorp/terraform/builtin/providers/dnsimple"
 	dockerprovider "github.com/hashicorp/terraform/builtin/providers/docker"
 	dynprovider "github.com/hashicorp/terraform/builtin/providers/dyn"
+	externalprovider "github.com/hashicorp/terraform/builtin/providers/external"
 	fastlyprovider "github.com/hashicorp/terraform/builtin/providers/fastly"
 	githubprovider "github.com/hashicorp/terraform/builtin/providers/github"
 	googleprovider "github.com/hashicorp/terraform/builtin/providers/google"
 	grafanaprovider "github.com/hashicorp/terraform/builtin/providers/grafana"
 	herokuprovider "github.com/hashicorp/terraform/builtin/providers/heroku"
+	icinga2provider "github.com/hashicorp/terraform/builtin/providers/icinga2"
+	ignitionprovider "github.com/hashicorp/terraform/builtin/providers/ignition"
 	influxdbprovider "github.com/hashicorp/terraform/builtin/providers/influxdb"
 	libratoprovider "github.com/hashicorp/terraform/builtin/providers/librato"
 	logentriesprovider "github.com/hashicorp/terraform/builtin/providers/logentries"
 	mailgunprovider "github.com/hashicorp/terraform/builtin/providers/mailgun"
 	mysqlprovider "github.com/hashicorp/terraform/builtin/providers/mysql"
+	newrelicprovider "github.com/hashicorp/terraform/builtin/providers/newrelic"
+	nomadprovider "github.com/hashicorp/terraform/builtin/providers/nomad"
 	nullprovider "github.com/hashicorp/terraform/builtin/providers/null"
 	openstackprovider "github.com/hashicorp/terraform/builtin/providers/openstack"
+	opsgenieprovider "github.com/hashicorp/terraform/builtin/providers/opsgenie"
 	packetprovider "github.com/hashicorp/terraform/builtin/providers/packet"
+	pagerdutyprovider "github.com/hashicorp/terraform/builtin/providers/pagerduty"
 	postgresqlprovider "github.com/hashicorp/terraform/builtin/providers/postgresql"
 	powerdnsprovider "github.com/hashicorp/terraform/builtin/providers/powerdns"
+	profitbricksprovider "github.com/hashicorp/terraform/builtin/providers/profitbricks"
 	rabbitmqprovider "github.com/hashicorp/terraform/builtin/providers/rabbitmq"
+	rancherprovider "github.com/hashicorp/terraform/builtin/providers/rancher"
 	randomprovider "github.com/hashicorp/terraform/builtin/providers/random"
 	rundeckprovider "github.com/hashicorp/terraform/builtin/providers/rundeck"
 	scalewayprovider "github.com/hashicorp/terraform/builtin/providers/scaleway"
@@ -51,6 +61,7 @@ import (
 	tlsprovider "github.com/hashicorp/terraform/builtin/providers/tls"
 	tritonprovider "github.com/hashicorp/terraform/builtin/providers/triton"
 	ultradnsprovider "github.com/hashicorp/terraform/builtin/providers/ultradns"
+	vaultprovider "github.com/hashicorp/terraform/builtin/providers/vault"
 	vcdprovider "github.com/hashicorp/terraform/builtin/providers/vcd"
 	vsphereprovider "github.com/hashicorp/terraform/builtin/providers/vsphere"
 	chefresourceprovisioner "github.com/hashicorp/terraform/builtin/provisioners/chef"
@@ -63,6 +74,7 @@ import (
 )
 
 var InternalProviders = map[string]plugin.ProviderFunc{
+	"alicloud":     alicloudprovider.Provider,
 	"archive":      archiveprovider.Provider,
 	"atlas":        atlasprovider.Provider,
 	"aws":          awsprovider.Provider,
@@ -81,22 +93,31 @@ var InternalProviders = map[string]plugin.ProviderFunc{
 	"dnsimple":     dnsimpleprovider.Provider,
 	"docker":       dockerprovider.Provider,
 	"dyn":          dynprovider.Provider,
+	"external":     externalprovider.Provider,
 	"fastly":       fastlyprovider.Provider,
 	"github":       githubprovider.Provider,
 	"google":       googleprovider.Provider,
 	"grafana":      grafanaprovider.Provider,
 	"heroku":       herokuprovider.Provider,
+	"icinga2":      icinga2provider.Provider,
+	"ignition":     ignitionprovider.Provider,
 	"influxdb":     influxdbprovider.Provider,
 	"librato":      libratoprovider.Provider,
 	"logentries":   logentriesprovider.Provider,
 	"mailgun":      mailgunprovider.Provider,
 	"mysql":        mysqlprovider.Provider,
+	"newrelic":     newrelicprovider.Provider,
+	"nomad":        nomadprovider.Provider,
 	"null":         nullprovider.Provider,
 	"openstack":    openstackprovider.Provider,
+	"opsgenie":     opsgenieprovider.Provider,
 	"packet":       packetprovider.Provider,
+	"pagerduty":    pagerdutyprovider.Provider,
 	"postgresql":   postgresqlprovider.Provider,
 	"powerdns":     powerdnsprovider.Provider,
+	"profitbricks": profitbricksprovider.Provider,
 	"rabbitmq":     rabbitmqprovider.Provider,
+	"rancher":      rancherprovider.Provider,
 	"random":       randomprovider.Provider,
 	"rundeck":      rundeckprovider.Provider,
 	"scaleway":     scalewayprovider.Provider,
@@ -108,6 +129,7 @@ var InternalProviders = map[string]plugin.ProviderFunc{
 	"tls":          tlsprovider.Provider,
 	"triton":       tritonprovider.Provider,
 	"ultradns":     ultradnsprovider.Provider,
+	"vault":        vaultprovider.Provider,
 	"vcd":          vcdprovider.Provider,
 	"vsphere":      vsphereprovider.Provider,
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,11 @@ func resourceAwsAlbTargetGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"arn": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"arn_suffix": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -69,6 +75,11 @@ func resourceAwsAlbTargetGroup() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
@@ -218,6 +229,7 @@ func resourceAwsAlbTargetGroupRead(d *schema.ResourceData, meta interface{}) err
 	targetGroup := resp.TargetGroups[0]
 
 	d.Set("arn", targetGroup.TargetGroupArn)
+	d.Set("arn_suffix", albTargetGroupSuffixFromARN(targetGroup.TargetGroupArn))
 	d.Set("name", targetGroup.TargetGroupName)
 	d.Set("port", targetGroup.Port)
 	d.Set("protocol", targetGroup.Protocol)
@@ -244,6 +256,8 @@ func resourceAwsAlbTargetGroupRead(d *schema.ResourceData, meta interface{}) err
 	stickinessMap := map[string]interface{}{}
 	for _, attr := range attrResp.Attributes {
 		switch *attr.Key {
+		case "stickiness.enabled":
+			stickinessMap["enabled"] = *attr.Value
 		case "stickiness.type":
 			stickinessMap["type"] = *attr.Value
 		case "stickiness.lb_cookie.duration_seconds":
@@ -317,7 +331,7 @@ func resourceAwsAlbTargetGroupUpdate(d *schema.ResourceData, meta interface{}) e
 			attrs = append(attrs,
 				&elbv2.TargetGroupAttribute{
 					Key:   aws.String("stickiness.enabled"),
-					Value: aws.String("true"),
+					Value: aws.String(strconv.FormatBool(stickiness["enabled"].(bool))),
 				},
 				&elbv2.TargetGroupAttribute{
 					Key:   aws.String("stickiness.type"),
@@ -462,4 +476,18 @@ func validateAwsAlbTargetGroupStickinessCookieDuration(v interface{}, k string) 
 		errors = append(errors, fmt.Errorf("%q must be a between 1 second and 1 week (1-604800 seconds))", k))
 	}
 	return
+}
+
+func albTargetGroupSuffixFromARN(arn *string) string {
+	if arn == nil {
+		return ""
+	}
+
+	if arnComponents := regexp.MustCompile(`arn:.*:targetgroup/(.*)`).FindAllStringSubmatch(*arn, -1); len(arnComponents) == 1 {
+		if len(arnComponents[0]) == 2 {
+			return fmt.Sprintf("targetgroup/%s", arnComponents[0][1])
+		}
+	}
+
+	return ""
 }
